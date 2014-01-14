@@ -41,7 +41,7 @@ func (f findPanda) String() string {
 	return string(f)
 }
 
-func TestEvaluationBasic(t *testing.T) {
+func TestEvolution(t *testing.T) {
 	var pop = Population(make([]Entity, 100))
 	for i := range pop {
 		pop[i] = findPanda(make([]byte, len(panda)))

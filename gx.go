@@ -24,7 +24,10 @@ func (p Population) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p Population) Less(i, j int) bool { return p[i].Score() < p[j].Score() }
 
 // Evolve the population according to the scores.
-// The top `elites` entities will always be perserved.
+//
+// Note on the elites group:
+// The top elites entities will be perserved,
+// and no CrossOver will performed between them.
 func Evolve(pop Population, elites int, mutate, cross float64) {
 	n := pop.Len()
 	// prepare
