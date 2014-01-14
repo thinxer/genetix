@@ -5,51 +5,46 @@ import (
 	"sort"
 )
 
-// Entity represents something to be evolved.
-// You should update the scores after each evolution.
-type Entity interface {
-	Score() float64
-	Mutate()
-	CrossOver(Entity)
-	Clone() Entity
-	String() string
+// Population represents the entities to be evolved.
+type Population interface {
+	sort.Interface
+	// Mutate the entity at i.
+	Mutate(i int)
+	// CrossOver the two entities at i and j. Both will be modified.
+	CrossOver(i, j int)
+	// Copy the entity from src to dst.
+	Copy(dst, src int)
+	// Dedup removes all duplicates, and fills in new entities if needed.
+	Dedup()
 }
-
-// Population is a collection of entities.
-// The only purpose of defining this type, is to make it sort-able.
-type Population []Entity
-
-func (p Population) Len() int           { return len(p) }
-func (p Population) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-func (p Population) Less(i, j int) bool { return p[i].Score() < p[j].Score() }
 
 // Evolve the population according to the scores.
 //
-// Note on the elites group:
-// The top elites entities will be perserved,
-// and no CrossOver will performed between them.
+// The top entities will be preserved as elites, and they will
+// always be sorted and placed at [0..elites-1].
+// The last elements of pop will be used for temporary storage for elites.
 func Evolve(pop Population, elites int, mutate, cross float64) {
 	n := pop.Len()
+	reduced := n - elites
 	// prepare
 	sort.Sort(pop)
-	// perserve
-	top := make([]Entity, elites)
-	for i := range top {
-		top[i] = pop[i].Clone()
+	// preserve
+	for i := 0; i < elites; i++ {
+		pop.Copy(n-i-1, i)
 	}
 	// mutate
 	for loop := int(float64(n) * mutate); loop >= 0; loop-- {
-		i := rand.Intn(n)
-		pop[i].Mutate()
+		i := rand.Intn(reduced)
+		pop.Mutate(i)
 	}
 	// crossover
 	for loop := int(float64(n*(n-1)/2) * cross); loop >= 0; loop-- {
-		i := rand.Intn(n)
-		j := rand.Intn(n)
-		pop[i].CrossOver(pop[j])
+		pop.CrossOver(rand.Intn(reduced), rand.Intn(reduced))
 	}
-	// restore elites
-	for i, e := range top {
-		pop[i] = e
+	// restore
+	for i := 0; i < elites; i++ {
+		pop.Swap(i, n-i-1)
 	}
+	// clean up
+	pop.Dedup()
 }

@@ -3,6 +3,7 @@ package genetix
 import (
 	"math/rand"
 	"testing"
+	"time"
 )
 
 var panda = []byte("giantpanda")
@@ -16,6 +17,12 @@ func (f findPanda) Score() (s float64) {
 		}
 	}
 	return
+}
+
+func (f findPanda) Reset() {
+	for i := range f {
+		f[i] = 0
+	}
 }
 
 func (f findPanda) Mutate() {
@@ -42,7 +49,8 @@ func (f findPanda) String() string {
 }
 
 func TestEvolution(t *testing.T) {
-	var pop = Population(make([]Entity, 100))
+	rand.Seed(time.Now().UnixNano())
+	var pop = EntityPopulation(make([]Entity, 100))
 	for i := range pop {
 		pop[i] = findPanda(make([]byte, len(panda)))
 	}
