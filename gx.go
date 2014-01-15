@@ -14,8 +14,6 @@ type Population interface {
 	CrossOver(i, j int)
 	// Copy the entity from src to dst.
 	Copy(dst, src int)
-	// Dedup removes all duplicates, and fills in new entities if needed.
-	Dedup()
 }
 
 // Evolve the population according to the scores.
@@ -45,6 +43,4 @@ func Evolve(pop Population, elites int, mutate, cross float64) {
 	for i := 0; i < elites; i++ {
 		pop.Swap(i, n-i-1)
 	}
-	// clean up
-	pop.Dedup()
 }
